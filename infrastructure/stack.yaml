@@ -1,0 +1,46 @@
+Description: API Gateway and lambda
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  S3KeyPath:
+    Type: String
+  CostCenterTag:
+    Type: String
+    Default: "services.image-housekeeping"
+
+Resources:
+  LambdaFunction:
+    Type: "AWS::Lambda::Function"
+    Description: Handles deleting the older ECR images when a new one is pushed
+    Properties:
+      FunctionName: "image-housekeeping"
+      Handler: app/src/handler/event_handler.handle_new_image
+      Runtime: python3.13
+      MemorySize: 128
+      Code:
+        S3Bucket: "eb-solutions-code-deployment"
+        S3Key: !Sub "services/image-housekeeping/${S3KeyPath}/service.zip"
+      Role: arn:aws:iam::654918520080:role/image-housekeeping-role
+      Timeout: 60
+
+  EventRule:
+    Type: AWS::Events::Rule
+    Description: Handles scaling up of ECS and ALB stacks
+    Properties:
+      EventPattern:
+        detail:
+          action-type: [ PUSH ]
+          image-tag: [ latest ]
+          repository-name: [ applications.paper-trail.financial-data-ingestion-service ]
+          result: [ SUCCESS ]
+        detail-type: [ ECR Image Action ]
+        source: [ aws.ecr ]
+      Targets:
+        - Arn: !Ref LambdaFunction
+          RoleArn: !GetAtt
+            - LambdaFunction
+            - Role
+          Id: image-housekeeping-rule-id
+      Tags:
+        - Key: CostCenter
+          Value: !Ref CostCenterTag
