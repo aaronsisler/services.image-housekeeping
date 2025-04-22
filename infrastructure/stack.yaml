@@ -22,6 +22,9 @@ Resources:
         S3Key: !Sub "services/image-housekeeping/${S3KeyPath}/service.zip"
       Role: arn:aws:iam::654918520080:role/image-housekeeping-role
       Timeout: 60
+      Tags:
+        - Key: CostCenter
+          Value: !Ref CostCenterTag
 
   EventRule:
     Type: AWS::Events::Rule
@@ -41,6 +44,3 @@ Resources:
             - LambdaFunction
             - Role
           Id: image-housekeeping-rule-id
-      Tags:
-        - Key: CostCenter
-          Value: !Ref CostCenterTag
