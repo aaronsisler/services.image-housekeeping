@@ -2,7 +2,7 @@ name: Pull Request
 on:
   push:
     branches:
-      - feature/init-shell
+      - feature/handler
 
 jobs:
   Publish-Lambda-To-Cloud:
