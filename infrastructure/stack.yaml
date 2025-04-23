@@ -27,6 +27,7 @@ Resources:
           Value: !Ref CostCenterTag
 
   EventRule:
+    DependsOn: [ LambdaFunction ]
     Type: AWS::Events::Rule
     Description: Handles scaling up of ECS and ALB stacks
     Properties:
@@ -39,5 +40,5 @@ Resources:
         detail-type: [ ECR Image Action ]
         source: [ aws.ecr ]
       Targets:
-        - Arn: !Ref LambdaFunction
+        - Arn: !GetAtt LambdaFunctionCreate.Arn
           Id: image-housekeeping-rule-id
