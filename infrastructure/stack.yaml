@@ -40,7 +40,4 @@ Resources:
         source: [ aws.ecr ]
       Targets:
         - Arn: !Ref LambdaFunction
-          RoleArn: !GetAtt
-            - LambdaFunction
-            - Role
           Id: image-housekeeping-rule-id
